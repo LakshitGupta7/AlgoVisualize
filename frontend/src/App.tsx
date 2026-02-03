@@ -3,6 +3,8 @@ import { ThemeProvider } from './hooks/useTheme';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { SortingPage } from './pages/SortingPage';
+import { SearchingPage } from './pages/SearchingPage';
+import { DataStructuresPage } from './pages/DataStructuresPage';
 import './index.css';
 
 function App() {
@@ -15,7 +17,9 @@ function App() {
       case 'sorting':
         return <SortingPage />;
       case 'searching':
-        return <ComingSoon title="Searching Algorithms" icon="🔍" />;
+        return <SearchingPage />;
+      case 'datastructures':
+        return <DataStructuresPage />;
       case 'graph':
         return <ComingSoon title="Graph Algorithms" icon="🔗" />;
       case 'tree':

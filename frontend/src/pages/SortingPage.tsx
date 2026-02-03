@@ -2,7 +2,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import type { SortingStep } from '../types';
 import { SortingVisualizer } from '../visualizers/SortingVisualizer';
 import { Controls } from '../components/Controls';
-import { CodeViewer, getHighlightLine } from '../components/CodeViewer';
+import { CodeViewer } from '../components/CodeViewer';
+import { getHighlightLine } from '../utils/codeHighlight';
 import { useVisualization } from '../hooks/useVisualization';
 import { API_BASE_URL } from '../config';
 import './SortingPage.css';
@@ -63,15 +64,16 @@ export const SortingPage: React.FC = () => {
 
             const data = await response.json();
 
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (!data.steps || !Array.isArray(data.steps)) {
+                throw new Error('Invalid response format from server');
+            }
+
             // Transform backend response to frontend format
-            const transformedSteps: SortingStep[] = data.steps.map((step: {
-                array: number[];
-                comparing?: number[];
-                swapping?: number[];
-                sorted?: number[];
-                pivot?: number;
-                description: string;
-            }) => ({
+            const transformedSteps: SortingStep[] = data.steps.map((step: SortingStep) => ({
                 array: step.array,
                 comparing: step.comparing || [],
                 swapping: step.swapping || [],
@@ -85,9 +87,9 @@ export const SortingPage: React.FC = () => {
                 comparisons: data.total_comparisons || 0,
                 swaps: data.total_swaps || 0,
             });
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Backend error:', err);
-            setError('Could not connect to backend. Make sure the Python server is running on port 8000.');
+            setError(err instanceof Error ? err.message : 'An unexpected error occurred. Make sure the Python server is running on port 8000.');
         } finally {
             setIsLoading(false);
         }
@@ -106,10 +108,10 @@ export const SortingPage: React.FC = () => {
     const highlightType = useMemo(() => {
         if (!currentStepData) return 'comparing';
         if (currentStepData.swapping && currentStepData.swapping.length > 0) return 'swapping';
-        if (currentStepData.sorted && currentStepData.sorted.length === parseArray(inputArray).length) return 'sorted';
+        if (currentStepData.sorted && currentStepData.sorted.length === currentStepData.array.length) return 'sorted';
         if (currentStepData.pivot !== undefined) return 'pivot';
         return 'comparing';
-    }, [currentStepData, inputArray]);
+    }, [currentStepData]);
 
     return (
         <div className="page sorting-page">

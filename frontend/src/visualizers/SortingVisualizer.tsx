@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, useState } from 'react';
+import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import type { SortingStep } from '../types';
 import './SortingVisualizer.css';
 
@@ -20,7 +20,7 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step, maxV
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Calculate bar width
-    const barWidth = useMemo(() => {
+    const getBarWidth = useCallback(() => {
         const containerWidth = containerRef.current?.clientWidth || 800;
         const gap = 3;
         return Math.max((containerWidth - gap * (array.length - 1)) / array.length, 12);
@@ -29,6 +29,7 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step, maxV
     // Track positions and calculate translations for swap animation
     useEffect(() => {
         const prevArray = prevArrayRef.current;
+        const barWidth = getBarWidth();
 
         if (prevArray.length === array.length && swapping && swapping.length === 2) {
             // Find where each element moved
@@ -61,7 +62,7 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step, maxV
         }
 
         prevArrayRef.current = [...array];
-    }, [array, swapping, barWidth]);
+    }, [array, swapping, getBarWidth]);
 
     const bars = useMemo(() => {
         return array.map((value, index) => {

@@ -52,13 +52,20 @@ def binary_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep
     
     # Sort array first for binary search
     sorted_arr = sorted(arr)
+    n = len(sorted_arr)
     
+    if n == 0:
+        return [SearchingStep(array=[], description="Empty array")], False, None
+    
+    left, right = 0, n - 1
+    
+    # Initial step showing full range
     steps.append(SearchingStep(
         array=sorted_arr.copy(),
-        description=f"Binary search requires sorted array. Searching for {target}"
+        left=left,
+        right=right,
+        description=f"Binary search: left={left}, right={right}. Searching for {target}"
     ))
-    
-    left, right = 0, len(sorted_arr) - 1
     
     while left <= right:
         mid = (left + right) // 2
@@ -76,6 +83,8 @@ def binary_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep
             found_at = mid
             steps.append(SearchingStep(
                 array=sorted_arr.copy(),
+                left=left,
+                right=right,
                 mid=mid,
                 found=True,
                 description=f"Found {target} at index {mid}!"
@@ -123,22 +132,29 @@ def jump_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep],
         return [SearchingStep(array=[], description="Empty array")], False, None
     
     import math
-    step = int(math.sqrt(n))
+    step_size = int(math.sqrt(n))
     
+    # Initial step showing range
     steps.append(SearchingStep(
         array=sorted_arr.copy(),
-        description=f"Jump search with step size {step}. Searching for {target}"
+        left=0,
+        right=n - 1,
+        description=f"Jump search with step size {step_size}. Searching for {target}"
     ))
     
     prev = 0
+    step = step_size
+    
     while sorted_arr[min(step, n) - 1] < target:
         steps.append(SearchingStep(
             array=sorted_arr.copy(),
+            left=prev,
+            right=min(step, n) - 1,
             current=min(step, n) - 1,
             description=f"Jumping: {sorted_arr[min(step, n) - 1]} < {target}"
         ))
         prev = step
-        step += int(math.sqrt(n))
+        step += step_size
         if prev >= n:
             steps.append(SearchingStep(
                 array=sorted_arr.copy(),
@@ -147,32 +163,41 @@ def jump_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep],
             ))
             return steps, False, None
     
+    # Found the block
+    block_start = prev
+    block_end = min(step, n) - 1
+    
     steps.append(SearchingStep(
         array=sorted_arr.copy(),
-        left=prev,
-        right=min(step, n) - 1,
-        description=f"Linear search in block [{prev}:{min(step, n)}]"
+        left=block_start,
+        right=block_end,
+        description=f"Linear search in block [{block_start}:{block_end}]"
     ))
     
     # Linear search in block
-    while prev < min(step, n):
+    current_pos = block_start
+    while current_pos <= block_end:
         steps.append(SearchingStep(
             array=sorted_arr.copy(),
-            current=prev,
-            description=f"Checking index {prev}: {sorted_arr[prev]}"
+            left=block_start,
+            right=block_end,
+            current=current_pos,
+            description=f"Checking index {current_pos}: {sorted_arr[current_pos]}"
         ))
         
-        if sorted_arr[prev] == target:
+        if sorted_arr[current_pos] == target:
             found = True
-            found_at = prev
+            found_at = current_pos
             steps.append(SearchingStep(
                 array=sorted_arr.copy(),
-                current=prev,
+                left=block_start,
+                right=block_end,
+                current=current_pos,
                 found=True,
-                description=f"Found {target} at index {prev}!"
+                description=f"Found {target} at index {current_pos}!"
             ))
             break
-        prev += 1
+        current_pos += 1
     
     if not found:
         steps.append(SearchingStep(
@@ -196,12 +221,15 @@ def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[Search
     if n == 0:
         return [SearchingStep(array=[], description="Empty array")], False, None
     
+    low, high = 0, n - 1
+    
+    # Initial step showing range
     steps.append(SearchingStep(
         array=sorted_arr.copy(),
-        description=f"Interpolation search. Searching for {target}"
+        left=low,
+        right=high,
+        description=f"Interpolation search: low={low}, high={high}. Searching for {target}"
     ))
-    
-    low, high = 0, n - 1
     
     while low <= high and target >= sorted_arr[low] and target <= sorted_arr[high]:
         if low == high:
@@ -210,6 +238,8 @@ def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[Search
                 found_at = low
                 steps.append(SearchingStep(
                     array=sorted_arr.copy(),
+                    left=low,
+                    right=high,
                     current=low,
                     found=True,
                     description=f"Found {target} at index {low}!"
@@ -224,6 +254,7 @@ def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[Search
             array=sorted_arr.copy(),
             left=low,
             right=high,
+            mid=pos,
             current=pos,
             description=f"Interpolated position: {pos}, value: {sorted_arr[pos]}"
         ))
@@ -233,6 +264,9 @@ def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[Search
             found_at = pos
             steps.append(SearchingStep(
                 array=sorted_arr.copy(),
+                left=low,
+                right=high,
+                mid=pos,
                 current=pos,
                 found=True,
                 description=f"Found {target} at index {pos}!"
@@ -265,14 +299,20 @@ def exponential_search_steps(arr: list[int], target: int) -> tuple[list[Searchin
     if n == 0:
         return [SearchingStep(array=[], description="Empty array")], False, None
     
+    # Initial step
     steps.append(SearchingStep(
         array=sorted_arr.copy(),
-        description=f"Exponential search. Searching for {target}"
+        left=0,
+        right=n - 1,
+        description=f"Exponential search: finding range for {target}"
     ))
     
     if sorted_arr[0] == target:
         return [SearchingStep(
             array=sorted_arr.copy(),
+            left=0,
+            right=0,
+            mid=0,
             current=0,
             found=True,
             description=f"Found {target} at index 0!"
@@ -283,6 +323,8 @@ def exponential_search_steps(arr: list[int], target: int) -> tuple[list[Searchin
     while i < n and sorted_arr[i] <= target:
         steps.append(SearchingStep(
             array=sorted_arr.copy(),
+            left=i // 2,
+            right=min(i, n - 1),
             current=i,
             description=f"Exponential jump to index {i}: {sorted_arr[i]}"
         ))
@@ -307,7 +349,7 @@ def exponential_search_steps(arr: list[int], target: int) -> tuple[list[Searchin
             left=left,
             right=right,
             mid=mid,
-            description=f"Checking middle: {sorted_arr[mid]}"
+            description=f"Checking middle: index {mid} = {sorted_arr[mid]}"
         ))
         
         if sorted_arr[mid] == target:
@@ -315,6 +357,8 @@ def exponential_search_steps(arr: list[int], target: int) -> tuple[list[Searchin
             found_at = mid
             steps.append(SearchingStep(
                 array=sorted_arr.copy(),
+                left=left,
+                right=right,
                 mid=mid,
                 found=True,
                 description=f"Found {target} at index {mid}!"

@@ -12,6 +12,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
     const navItems = [
         { id: 'home', label: 'Home', icon: '🏠' },
+        { id: 'datastructures', label: 'Basic DS', icon: '🗃️' },
         { id: 'sorting', label: 'Sorting', icon: '📊' },
         { id: 'searching', label: 'Searching', icon: '🔍' },
         { id: 'graph', label: 'Graph', icon: '🔗' },

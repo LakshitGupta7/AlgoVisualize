@@ -21,6 +21,7 @@ class SortingStep(BaseModel):
     swapping: Optional[list[int]] = None   # Indices being swapped
     sorted: list[int] = []                 # Already sorted indices
     pivot: Optional[int] = None            # Pivot index for quick sort
+    buckets: Optional[list[list[int]]] = None  # Buckets for bucket sort
     description: str
 
 

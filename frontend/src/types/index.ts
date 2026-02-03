@@ -22,7 +22,7 @@ export interface SearchingStep {
     left?: number;
     right?: number;
     mid?: number;
-    found: boolean;
+    found?: boolean;
     description: string;
 }
 

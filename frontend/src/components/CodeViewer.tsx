@@ -148,43 +148,124 @@ const ALGORITHM_CODE: Record<string, { code: string; lines: string[] }> = {
             '}',
         ],
     },
+    bucket: {
+        code: 'bucketSort',
+        lines: [
+            'void bucketSort(float arr[], int n) {',
+            '    // Create n empty buckets',
+            '    vector<float> buckets[n];',
+            '    // Put elements in buckets',
+            '    for (int i = 0; i < n; i++) {',
+            '        int idx = n * arr[i];',
+            '        buckets[idx].push_back(arr[i]);',
+            '    }',
+            '    // Sort each bucket',
+            '    for (int i = 0; i < n; i++) {',
+            '        sort(buckets[i].begin(), buckets[i].end());',
+            '    }',
+            '    // Concatenate buckets',
+            '    int index = 0;',
+            '    for (int i = 0; i < n; i++) {',
+            '        for (int j = 0; j < buckets[i].size(); j++) {',
+            '            arr[index++] = buckets[i][j];',
+            '        }',
+            '    }',
+            '}',
+        ],
+    },
+    linear: {
+        code: 'linearSearch',
+        lines: [
+            'int linearSearch(int arr[], int n, int x) {',
+            '    for (int i = 0; i < n; i++) {',
+            '        // Check each element',
+            '        if (arr[i] == x) {',
+            '            // Found at index i',
+            '            return i;',
+            '        }',
+            '    }',
+            '    // Not found',
+            '    return -1;',
+            '}',
+        ],
+    },
+    binary: {
+        code: 'binarySearch',
+        lines: [
+            'int binarySearch(int arr[], int l, int r, int x) {',
+            '    while (l <= r) {',
+            '        int m = l + (r - l) / 2;',
+            '        // Check if x is at mid',
+            '        if (arr[m] == x) {',
+            '            return m;',
+            '        }',
+            '        // If x greater, ignore left half',
+            '        if (arr[m] < x) {',
+            '            l = m + 1;',
+            '        }',
+            '        // If x smaller, ignore right half',
+            '        else {',
+            '            r = m - 1;',
+            '        }',
+            '    }',
+            '    return -1;',
+            '}',
+        ],
+    },
+    jump: {
+        code: 'jumpSearch',
+        lines: [
+            'int jumpSearch(int arr[], int n, int x) {',
+            '    int step = sqrt(n);',
+            '    int prev = 0;',
+            '    // Jump through blocks',
+            '    while (arr[min(step, n)-1] < x) {',
+            '        prev = step;',
+            '        step += sqrt(n);',
+            '        if (prev >= n) return -1;',
+            '    }',
+            '    // Linear search in block',
+            '    while (arr[prev] < x) {',
+            '        prev++;',
+            '        if (prev == min(step, n)) return -1;',
+            '    }',
+            '    if (arr[prev] == x) return prev;',
+            '    return -1;',
+            '}',
+        ],
+    },
+    interpolation: {
+        code: 'interpolationSearch',
+        lines: [
+            'int interpolationSearch(int arr[], int n, int x) {',
+            '    int low = 0, high = (n - 1);',
+            '    while (low <= high && x >= arr[low] && x <= arr[high]) {',
+            '        // Proportional position',
+            '        int pos = low + (((double)(high - low) / (arr[high] - arr[low])) * (x - arr[low]));',
+            '        if (arr[pos] == x) return pos;',
+            '        if (arr[pos] < x) low = pos + 1;',
+            '        else high = pos - 1;',
+            '    }',
+            '    return -1;',
+            '}',
+        ],
+    },
+    exponential: {
+        code: 'exponentialSearch',
+        lines: [
+            'int exponentialSearch(int arr[], int n, int x) {',
+            '    if (arr[0] == x) return 0;',
+            '    int i = 1;',
+            '    // Find range for binary search',
+            '    while (i < n && arr[i] <= x)',
+            '        i = i * 2;',
+            '    // Call binary search for range',
+            '    return binarySearch(arr, i/2, min(i, n-1), x);',
+            '}',
+        ],
+    },
 };
 
-// Map description patterns to line numbers
-const getHighlightLine = (algorithm: string, description: string): number => {
-    const desc = description.toLowerCase();
-
-    if (algorithm === 'bubble') {
-        if (desc.includes('comparing')) return 4;
-        if (desc.includes('swapping')) return 6;
-        if (desc.includes('sorted')) return 10;
-    } else if (algorithm === 'selection') {
-        if (desc.includes('finding minimum') || desc.includes('comparing')) return 5;
-        if (desc.includes('swapping')) return 10;
-        if (desc.includes('sorted')) return 12;
-    } else if (algorithm === 'insertion') {
-        if (desc.includes('inserting')) return 2;
-        if (desc.includes('moving')) return 6;
-        if (desc.includes('sorted')) return 12;
-    } else if (algorithm === 'merge') {
-        if (desc.includes('merging')) return 7;
-        if (desc.includes('placing')) return 15;
-        if (desc.includes('sorted')) return 7;
-    } else if (algorithm === 'quick') {
-        if (desc.includes('pivot')) return 10;
-        if (desc.includes('comparing')) return 14;
-        if (desc.includes('swapping')) return 17;
-        if (desc.includes('placing pivot') || desc.includes('correct position')) return 20;
-        if (desc.includes('sorted')) return 6;
-    } else if (algorithm === 'heap') {
-        if (desc.includes('heapifying') || desc.includes('comparing')) return 17;
-        if (desc.includes('swapping')) return 24;
-        if (desc.includes('moving max')) return 8;
-        if (desc.includes('sorted')) return 10;
-    }
-
-    return 0;
-};
 
 export const CodeViewer: React.FC<CodeViewerProps> = ({
     algorithm,
@@ -222,6 +303,3 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
         </div>
     );
 };
-
-// Export helper for getting highlight line
-export { getHighlightLine };

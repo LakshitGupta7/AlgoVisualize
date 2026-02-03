@@ -519,6 +519,102 @@ def radix_sort_steps(arr: list[int]) -> tuple[list[SortingStep], int, int]:
     return steps, 0, 0
 
 
+def bucket_sort_steps(arr: list[int]) -> tuple[list[SortingStep], int, int]:
+    """Bucket Sort with step-by-step visualization data"""
+    steps = []
+    arr = arr.copy()
+    n = len(arr)
+    
+    if not arr:
+        return [SortingStep(array=[], description="Empty array")], 0, 0
+    
+    steps.append(SortingStep(
+        array=arr.copy(),
+        description="Initial array"
+    ))
+    
+    # Find range
+    min_val = min(arr)
+    max_val = max(arr)
+    range_val = max_val - min_val + 1
+    
+    # Create buckets (use 5 or 10 buckets depending on range)
+    num_buckets = min(10, max(5, n // 2))
+    bucket_size = range_val / num_buckets
+    
+    steps.append(SortingStep(
+        array=arr.copy(),
+        description=f"Creating {num_buckets} buckets for range {min_val}-{max_val}"
+    ))
+    
+    # Initialize empty buckets
+    buckets = [[] for _ in range(num_buckets)]
+    
+    # Distribute elements into buckets
+    for i, num in enumerate(arr):
+        bucket_index = min(int((num - min_val) / bucket_size), num_buckets - 1)
+        buckets[bucket_index].append(num)
+        
+        steps.append(SortingStep(
+            array=arr.copy(),
+            comparing=[i],
+            buckets=[b.copy() for b in buckets],
+            description=f"Placing {num} into bucket {bucket_index + 1}"
+        ))
+    
+    steps.append(SortingStep(
+        array=arr.copy(),
+        buckets=[b.copy() for b in buckets],
+        description="All elements distributed into buckets"
+    ))
+    
+    # Sort each bucket using insertion sort
+    comparisons = 0
+    swaps = 0
+    
+    for i, bucket in enumerate(buckets):
+        if len(bucket) > 1:
+            # Insertion sort for this bucket
+            for j in range(1, len(bucket)):
+                key = bucket[j]
+                k = j - 1
+                while k >= 0 and bucket[k] > key:
+                    comparisons += 1
+                    bucket[k + 1] = bucket[k]
+                    swaps += 1
+                    k -= 1
+                bucket[k + 1] = key
+                if k >= 0:
+                    comparisons += 1
+            
+            steps.append(SortingStep(
+                array=arr.copy(),
+                buckets=[b.copy() for b in buckets],
+                description=f"Bucket {i + 1} sorted: {bucket}"
+            ))
+    
+    # Concatenate buckets
+    result = []
+    for i, bucket in enumerate(buckets):
+        for num in bucket:
+            result.append(num)
+            steps.append(SortingStep(
+                array=result.copy() + [0] * (n - len(result)),
+                sorted=list(range(len(result) - 1)),
+                comparing=[len(result) - 1],
+                buckets=[b.copy() for b in buckets],
+                description=f"Adding {num} from bucket {i + 1} to result"
+            ))
+    
+    steps.append(SortingStep(
+        array=result.copy(),
+        sorted=list(range(len(result))),
+        description="Array sorted!"
+    ))
+    
+    return steps, comparisons, swaps
+
+
 SORTING_ALGORITHMS = {
     "bubble": bubble_sort_steps,
     "selection": selection_sort_steps,
