@@ -1,35 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { Navbar } from './components/Navbar';
+import { HomePage } from './pages/HomePage';
+import { SortingPage } from './pages/SortingPage';
+import './index.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState('home');
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage onNavigate={setCurrentPage} />;
+      case 'sorting':
+        return <SortingPage />;
+      case 'searching':
+        return <ComingSoon title="Searching Algorithms" icon="🔍" />;
+      case 'graph':
+        return <ComingSoon title="Graph Algorithms" icon="🔗" />;
+      case 'tree':
+        return <ComingSoon title="Tree Algorithms" icon="🌳" />;
+      case 'dp':
+        return <ComingSoon title="Dynamic Programming" icon="🧮" />;
+      default:
+        return <HomePage onNavigate={setCurrentPage} />;
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app">
+      <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <main className="app-main">
+        {renderPage()}
+      </main>
+    </div>
+  );
 }
 
-export default App
+// Temporary coming soon component
+function ComingSoon({ title, icon }: { title: string; icon: string }) {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 'calc(100vh - 70px)',
+      textAlign: 'center',
+      padding: '2rem',
+    }}>
+      <span style={{ fontSize: '5rem', marginBottom: '1rem' }}>{icon}</span>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{title}</h1>
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.2rem' }}>
+        Coming soon! This visualization is under development.
+      </p>
+      <div style={{
+        marginTop: '2rem',
+        padding: '1rem 2rem',
+        background: 'rgba(99, 102, 241, 0.1)',
+        borderRadius: '12px',
+        border: '1px solid rgba(99, 102, 241, 0.2)',
+      }}>
+        <p style={{ color: 'var(--color-primary-light)' }}>
+          🚧 Check out the Sorting Algorithms page for a complete demo!
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default App;

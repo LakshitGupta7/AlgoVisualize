@@ -1,0 +1,42 @@
+name: Django CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/django/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/django/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: backend/django
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install django djangorestframework djangorestframework-simplejwt django-cors-headers
+      
+      - name: Run migrations check
+        run: python manage.py makemigrations --check --dry-run
+      
+      - name: Run tests
+        run: python manage.py test
+      
+      - name: Check deployment
+        run: python manage.py check --deploy --fail-level WARNING
+        continue-on-error: true

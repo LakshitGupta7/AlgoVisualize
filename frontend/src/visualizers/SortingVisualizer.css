@@ -1,0 +1,99 @@
+.sorting-visualizer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.bars-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    height: 350px;
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+}
+
+.viz-bar {
+    background: var(--gradient-primary);
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    transition: all 0.15s ease;
+    position: relative;
+    min-width: 8px;
+}
+
+.viz-bar.comparing {
+    background: var(--color-warning);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+    transform: scaleY(1.02);
+}
+
+.viz-bar.swapping {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+    transform: scaleY(1.02);
+}
+
+.viz-bar.sorted {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.viz-bar.pivot {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+}
+
+.bar-value {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.legend-color.comparing {
+    background: var(--color-warning);
+}
+
+.legend-color.swapping {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+}
+
+.legend-color.sorted {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+.legend-color.pivot {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+}
+
+.legend-item span {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
