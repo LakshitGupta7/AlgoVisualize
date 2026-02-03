@@ -6,6 +6,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    backdrop-filter: blur(10px);
 }
 
 .controls-main {
@@ -21,134 +22,201 @@
 }
 
 .control-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--color-bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-normal);
 }
 
-.control-btn:hover {
-    background: var(--color-bg-glass);
+.control-btn:hover:not(:disabled) {
+    background: var(--color-bg-secondary);
     border-color: var(--color-primary);
-    transform: scale(1.05);
+    transform: scale(1.08);
+    box-shadow: var(--shadow-glow-cyan);
+}
+
+.control-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .control-btn-primary {
-    width: 56px;
-    height: 56px;
-    background: var(--gradient-primary);
+    width: 64px;
+    height: 64px;
+    background: var(--gradient-cyber);
     border: none;
-    font-size: 1.4rem;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    font-size: 1.6rem;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.control-btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.control-btn-primary:hover::before {
+    opacity: 1;
 }
 
 .control-btn-primary:hover {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.control-btn-primary.playing {
+    animation: pulse-play 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-play {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 35px rgba(0, 240, 255, 0.6);
+    }
 }
 
 .controls-progress {
     flex: 1;
     position: relative;
+    height: 24px;
+    display: flex;
+    align-items: center;
 }
 
 .progress-slider {
     width: 100%;
-    height: 8px;
+    height: 24px;
     appearance: none;
     background: transparent;
     cursor: pointer;
-    position: relative;
+    position: absolute;
     z-index: 2;
 }
 
 .progress-slider::-webkit-slider-thumb {
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     background: var(--color-primary);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 10px var(--color-primary);
+    box-shadow: 0 0 15px var(--color-primary);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 25px var(--color-primary);
 }
 
 .progress-bar {
     position: absolute;
-    bottom: 0;
     left: 0;
     right: 0;
-    height: 6px;
+    height: 8px;
     background: var(--color-bg-tertiary);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
-    background: var(--gradient-primary);
-    border-radius: 3px;
-    transition: width var(--transition-fast);
+    background: var(--gradient-cyber);
+    border-radius: 4px;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
 }
 
 .controls-info {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
 }
 
 .step-counter {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    font-size: 1rem;
     font-family: var(--font-mono);
-    min-width: 100px;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+    background: var(--color-bg-secondary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+}
+
+.step-divider {
+    color: var(--color-text-muted);
+    margin: 0 4px;
 }
 
 .controls-secondary {
     display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-lg);
+    justify-content: center;
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
 }
 
 .speed-control {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-bg-secondary);
+    border-radius: var(--border-radius-xl);
 }
 
-.speed-control label {
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
+.speed-label {
+    font-size: 1.2rem;
 }
 
 .speed-slider {
-    width: 100px;
-    height: 4px;
+    width: 150px;
+    height: 6px;
     appearance: none;
     background: var(--color-bg-tertiary);
-    border-radius: 2px;
+    border-radius: 3px;
     cursor: pointer;
 }
 
 .speed-slider::-webkit-slider-thumb {
     appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--color-secondary);
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--color-success) 0%, #00cc7d 100%);
     border-radius: 50%;
     cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.4);
+    transition: transform 0.2s ease;
+}
+
+.speed-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
 }
 
 .speed-value {
-    color: var(--color-secondary);
-    font-size: 0.85rem;
+    color: var(--color-success);
+    font-size: 0.9rem;
     font-family: var(--font-mono);
-    min-width: 40px;
+    font-weight: 700;
+    min-width: 45px;
+    text-align: center;
 }
 
 .controls-description {
@@ -156,18 +224,38 @@
     align-items: flex-start;
     gap: var(--spacing-sm);
     padding: var(--spacing-md);
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.08) 0%, rgba(177, 78, 255, 0.05) 100%);
+    border: 1px solid rgba(0, 240, 255, 0.15);
     border-radius: var(--border-radius-md);
 }
 
 .description-icon {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 .controls-description p {
     color: var(--color-text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     line-height: 1.5;
     margin: 0;
+}
+
+@media (max-width: 768px) {
+    .controls-main {
+        flex-wrap: wrap;
+    }
+
+    .controls-buttons {
+        order: 1;
+    }
+
+    .controls-progress {
+        order: 3;
+        width: 100%;
+    }
+
+    .controls-info {
+        order: 2;
+    }
 }

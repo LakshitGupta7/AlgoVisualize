@@ -5,23 +5,57 @@ interface UseVisualizationProps<T> {
     speed?: number;
 }
 
-export function useVisualization<T>({ steps, speed = 500 }: UseVisualizationProps<T>) {
+export function useVisualization<T>({ steps, speed = 50 }: UseVisualizationProps<T>) {
     const [currentStep, setCurrentStep] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [playSpeed, setPlaySpeed] = useState(speed);
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Calculate delay from speed (5 = slow/2000ms, 100 = fast/50ms)
+    const getDelay = useCallback((s: number) => {
+        // Map 5-100 to 2000ms-50ms (inverse relationship)
+        return Math.max(50, 2000 - (s * 20));
+    }, []);
 
     const clearTimer = useCallback(() => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
         }
     }, []);
 
+    const scheduleNextStep = useCallback(() => {
+        if (steps.length === 0) return;
+
+        clearTimer();
+
+        timeoutRef.current = setTimeout(() => {
+            setCurrentStep((prev) => {
+                if (prev >= steps.length - 1) {
+                    setIsPlaying(false);
+                    return prev;
+                }
+                return prev + 1;
+            });
+        }, getDelay(playSpeed));
+    }, [steps.length, playSpeed, getDelay, clearTimer]);
+
+    // Re-schedule when speed changes during playback
+    useEffect(() => {
+        if (isPlaying && currentStep < steps.length - 1) {
+            scheduleNextStep();
+        }
+
+        return clearTimer;
+    }, [isPlaying, currentStep, scheduleNextStep, clearTimer, steps.length]);
+
     const play = useCallback(() => {
         if (steps.length === 0) return;
+        if (currentStep >= steps.length - 1) {
+            setCurrentStep(0);
+        }
         setIsPlaying(true);
-    }, [steps.length]);
+    }, [steps.length, currentStep]);
 
     const pause = useCallback(() => {
         setIsPlaying(false);
@@ -34,35 +68,25 @@ export function useVisualization<T>({ steps, speed = 500 }: UseVisualizationProp
     }, [pause]);
 
     const stepForward = useCallback(() => {
+        pause();
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-    }, [steps.length]);
+    }, [steps.length, pause]);
 
     const stepBackward = useCallback(() => {
+        pause();
         setCurrentStep((prev) => Math.max(prev - 1, 0));
-    }, []);
+    }, [pause]);
 
     const goToStep = useCallback((step: number) => {
+        pause();
         setCurrentStep(Math.min(Math.max(0, step), steps.length - 1));
-    }, [steps.length]);
+    }, [steps.length, pause]);
 
-    useEffect(() => {
-        if (isPlaying && steps.length > 0) {
-            intervalRef.current = setInterval(() => {
-                setCurrentStep((prev) => {
-                    if (prev >= steps.length - 1) {
-                        setIsPlaying(false);
-                        clearTimer();
-                        return prev;
-                    }
-                    return prev + 1;
-                });
-            }, 1000 - (playSpeed * 9)); // Convert 0-100 to delay
-        } else {
-            clearTimer();
-        }
-
-        return clearTimer;
-    }, [isPlaying, playSpeed, steps.length, clearTimer]);
+    // Handle speed change - applies immediately
+    const handleSpeedChange = useCallback((newSpeed: number) => {
+        setPlaySpeed(newSpeed);
+        // The useEffect will automatically reschedule with new speed
+    }, []);
 
     return {
         currentStep,
@@ -76,7 +100,7 @@ export function useVisualization<T>({ steps, speed = 500 }: UseVisualizationProp
         stepForward,
         stepBackward,
         goToStep,
-        setPlaySpeed,
-        progress: steps.length > 0 ? (currentStep / (steps.length - 1)) * 100 : 0,
+        setPlaySpeed: handleSpeedChange,
+        progress: steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0,
     };
 }

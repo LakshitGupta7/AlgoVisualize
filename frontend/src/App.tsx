@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ThemeProvider } from './hooks/useTheme';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { SortingPage } from './pages/SortingPage';
@@ -27,12 +28,14 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <main className="app-main">
-        {renderPage()}
-      </main>
-    </div>
+    <ThemeProvider>
+      <div className="app">
+        <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
+        <main className="app-main">
+          {renderPage()}
+        </main>
+      </div>
+    </ThemeProvider>
   );
 }
 
@@ -56,11 +59,11 @@ function ComingSoon({ title, icon }: { title: string; icon: string }) {
       <div style={{
         marginTop: '2rem',
         padding: '1rem 2rem',
-        background: 'rgba(99, 102, 241, 0.1)',
+        background: 'rgba(0, 240, 255, 0.1)',
         borderRadius: '12px',
-        border: '1px solid rgba(99, 102, 241, 0.2)',
+        border: '1px solid rgba(0, 240, 255, 0.2)',
       }}>
-        <p style={{ color: 'var(--color-primary-light)' }}>
+        <p style={{ color: 'var(--color-primary)' }}>
           🚧 Check out the Sorting Algorithms page for a complete demo!
         </p>
       </div>

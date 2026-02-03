@@ -77,6 +77,32 @@
     gap: var(--spacing-sm);
 }
 
+.theme-toggle {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+}
+
+.theme-toggle:hover {
+    background: var(--color-bg-tertiary);
+    transform: rotate(20deg) scale(1.1);
+    box-shadow: var(--shadow-glow-cyan);
+}
+
+.theme-icon {
+    font-size: 1.3rem;
+    transition: transform var(--transition-normal);
+}
+
+.theme-toggle:active .theme-icon {
+    transform: scale(0.9);
+}
+
 @media (max-width: 768px) {
     .navbar-link-label {
         display: none;

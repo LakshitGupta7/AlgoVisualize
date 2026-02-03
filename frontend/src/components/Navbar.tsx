@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../hooks/useTheme';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -7,6 +8,8 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
+    const { theme, toggleTheme } = useTheme();
+
     const navItems = [
         { id: 'home', label: 'Home', icon: '🏠' },
         { id: 'sorting', label: 'Sorting', icon: '📊' },
@@ -37,8 +40,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             </div>
 
             <div className="navbar-actions">
-                <button className="btn btn-ghost">
-                    <span>🌙</span>
+                <button
+                    className="btn btn-ghost theme-toggle"
+                    onClick={toggleTheme}
+                    title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                    <span className="theme-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
                 </button>
             </div>
         </nav>

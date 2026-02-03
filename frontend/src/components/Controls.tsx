@@ -32,24 +32,43 @@ export const Controls: React.FC<ControlsProps> = ({
     onProgressChange,
     description,
 }) => {
+    // Convert speed percentage to readable label
+    const getSpeedLabel = (s: number) => {
+        if (s <= 20) return '0.25x';
+        if (s <= 40) return '0.5x';
+        if (s <= 60) return '1x';
+        if (s <= 80) return '2x';
+        return '4x';
+    };
+
     return (
         <div className="controls">
             <div className="controls-main">
                 <div className="controls-buttons">
-                    <button className="control-btn" onClick={onReset} title="Reset">
+                    <button className="control-btn" onClick={onReset} title="Reset to Start">
                         ⏮️
                     </button>
-                    <button className="control-btn" onClick={onStepBackward} title="Step Back">
+                    <button
+                        className="control-btn"
+                        onClick={onStepBackward}
+                        title="Previous Step"
+                        disabled={currentStep === 0}
+                    >
                         ⏪
                     </button>
                     <button
-                        className="control-btn control-btn-primary"
+                        className={`control-btn control-btn-primary ${isPlaying ? 'playing' : ''}`}
                         onClick={isPlaying ? onPause : onPlay}
                         title={isPlaying ? 'Pause' : 'Play'}
                     >
                         {isPlaying ? '⏸️' : '▶️'}
                     </button>
-                    <button className="control-btn" onClick={onStepForward} title="Step Forward">
+                    <button
+                        className="control-btn"
+                        onClick={onStepForward}
+                        title="Next Step"
+                        disabled={currentStep >= totalSteps - 1}
+                    >
                         ⏩
                     </button>
                 </div>
@@ -70,23 +89,24 @@ export const Controls: React.FC<ControlsProps> = ({
 
                 <div className="controls-info">
                     <span className="step-counter">
-                        Step {currentStep + 1} / {totalSteps}
+                        {currentStep + 1} <span className="step-divider">/</span> {totalSteps}
                     </span>
                 </div>
             </div>
 
             <div className="controls-secondary">
                 <div className="speed-control">
-                    <label>Speed</label>
+                    <span className="speed-label">🐢</span>
                     <input
                         type="range"
-                        min="10"
+                        min="5"
                         max="100"
                         value={speed}
                         onChange={(e) => onSpeedChange(parseInt(e.target.value))}
                         className="speed-slider"
                     />
-                    <span className="speed-value">{speed}%</span>
+                    <span className="speed-label">🐇</span>
+                    <span className="speed-value">{getSpeedLabel(speed)}</span>
                 </div>
             </div>
 

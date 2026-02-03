@@ -18,12 +18,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(sorting.router, prefix="/api/v1/sorting", tags=["Sorting"])
-app.include_router(searching.router, prefix="/api/v1/searching", tags=["Searching"])
-app.include_router(graph.router, prefix="/api/v1/graph", tags=["Graph"])
-app.include_router(tree.router, prefix="/api/v1/tree", tags=["Tree"])
-app.include_router(dp.router, prefix="/api/v1/dp", tags=["Dynamic Programming"])
+# Include routers (with versioned prefix)
+app.include_router(sorting.router, prefix="/api/v1/sorting", tags=["Sorting v1"])
+app.include_router(searching.router, prefix="/api/v1/searching", tags=["Searching v1"])
+app.include_router(graph.router, prefix="/api/v1/graph", tags=["Graph v1"])
+app.include_router(tree.router, prefix="/api/v1/tree", tags=["Tree v1"])
+app.include_router(dp.router, prefix="/api/v1/dp", tags=["Dynamic Programming v1"])
+
+# Include routers (simple prefix for frontend)
+app.include_router(sorting.router, prefix="/api/sorting", tags=["Sorting"])
+app.include_router(searching.router, prefix="/api/searching", tags=["Searching"])
+app.include_router(graph.router, prefix="/api/graph", tags=["Graph"])
+app.include_router(tree.router, prefix="/api/tree", tags=["Tree"])
+app.include_router(dp.router, prefix="/api/dp", tags=["Dynamic Programming"])
 
 
 @app.get("/")

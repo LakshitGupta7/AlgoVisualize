@@ -1,10 +1,11 @@
 from fastapi import APIRouter
+from typing import Optional
 from models.schemas import SearchingRequest, SearchingResponse, SearchingStep
 
 router = APIRouter()
 
 
-def linear_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, int | None]:
+def linear_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, Optional[int]]:
     """Linear Search with step-by-step visualization data"""
     steps = []
     found = False
@@ -43,7 +44,7 @@ def linear_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep
     return steps, found, found_at
 
 
-def binary_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, int | None]:
+def binary_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, Optional[int]]:
     """Binary Search with step-by-step visualization data"""
     steps = []
     found = False
@@ -109,7 +110,7 @@ def binary_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep
     return steps, found, found_at
 
 
-def jump_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, int | None]:
+def jump_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, Optional[int]]:
     """Jump Search with step-by-step visualization data"""
     steps = []
     found = False
@@ -183,7 +184,7 @@ def jump_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep],
     return steps, found, found_at
 
 
-def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, int | None]:
+def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, Optional[int]]:
     """Interpolation Search with step-by-step visualization data"""
     steps = []
     found = False
@@ -252,7 +253,7 @@ def interpolation_search_steps(arr: list[int], target: int) -> tuple[list[Search
     return steps, found, found_at
 
 
-def exponential_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, int | None]:
+def exponential_search_steps(arr: list[int], target: int) -> tuple[list[SearchingStep], bool, Optional[int]]:
     """Exponential Search with step-by-step visualization data"""
     steps = []
     found = False
