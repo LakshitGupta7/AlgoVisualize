@@ -1081,11 +1081,11 @@ export const DataStructuresPage: React.FC = () => {
                                         </div>
                                     ) : (
                                         <div className="queue-wrapper">
-                                            <div className="queue-pointer front-pointer">
-                                                <span>FRONT</span>
-                                                <span className="pointer-arrow">↓</span>
-                                            </div>
                                             <div className="queue-items">
+                                                <div className="queue-pointer front-pointer">
+                                                    <span>FRONT</span>
+                                                    <span className="pointer-arrow">↓</span>
+                                                </div>
                                                 {queue.map((item, index) => {
                                                     const isFront = index === 0;
                                                     const isRear = index === queue.length - 1;
@@ -1099,10 +1099,10 @@ export const DataStructuresPage: React.FC = () => {
                                                         </div>
                                                     );
                                                 })}
-                                            </div>
-                                            <div className="queue-pointer rear-pointer">
-                                                <span>REAR</span>
-                                                <span className="pointer-arrow">↓</span>
+                                                <div className="queue-pointer rear-pointer">
+                                                    <span>REAR</span>
+                                                    <span className="pointer-arrow">↓</span>
+                                                </div>
                                             </div>
                                         </div>
                                     )}

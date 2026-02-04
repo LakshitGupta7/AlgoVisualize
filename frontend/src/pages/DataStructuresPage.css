@@ -758,6 +758,8 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-md);
+    position: relative;
+    padding-top: 20px;
 }
 
 .queue-pointer {
@@ -767,20 +769,19 @@
     gap: 2px;
     font-weight: 700;
     font-size: 0.8rem;
+    position: absolute;
+    top: -20px;
+    transition: all 0.3s ease;
 }
 
 .front-pointer {
     color: var(--color-success);
-    position: absolute;
     left: 0;
-    top: -40px;
 }
 
 .rear-pointer {
     color: var(--color-accent);
-    position: absolute;
     right: 0;
-    top: -40px;
 }
 
 .pointer-arrow {
@@ -814,24 +815,6 @@
 .queue-item.front {
     background: linear-gradient(135deg, var(--color-success), #00a87a);
     box-shadow: 0 4px 20px rgba(0, 255, 157, 0.4);
-}
-
-.queue-item.front::before {
-    content: 'FRONT';
-    position: absolute;
-    top: -35px;
-    font-size: 0.7rem;
-    color: var(--color-success);
-    font-weight: 700;
-}
-
-.queue-item.rear::after {
-    content: 'REAR';
-    position: absolute;
-    top: -35px;
-    font-size: 0.7rem;
-    color: var(--color-accent);
-    font-weight: 700;
 }
 
 .queue-item.rear {
