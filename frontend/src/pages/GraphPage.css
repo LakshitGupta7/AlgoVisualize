@@ -140,10 +140,81 @@
     transition: all 0.3s ease;
 }
 
+.dist-label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    fill: var(--color-primary);
+    filter: drop-shadow(0 0 5px var(--color-primary));
+    pointer-events: none;
+    user-select: none;
+}
+
 .graph-edge.active {
     stroke: var(--color-success);
     stroke-width: 4;
     filter: drop-shadow(0 0 5px var(--color-success));
+}
+
+/* Edge Weights */
+.edge-weight-group {
+    cursor: pointer;
+}
+
+.edge-weight-group:hover .weight-bg {
+    stroke-width: 2;
+    filter: drop-shadow(0 0 5px var(--color-primary));
+}
+
+.weight-bg {
+    fill: var(--color-bg-tertiary);
+    stroke: var(--color-primary);
+    stroke-width: 1;
+}
+
+.weight-text {
+    fill: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Final Path Cost Badge */
+.final-cost-badge {
+    animation: slideInDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cost-badge-bg {
+    fill: var(--color-bg-panel);
+    stroke: var(--color-success);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 157, 0.3));
+}
+
+.cost-badge-label {
+    fill: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+.cost-badge-value {
+    fill: var(--color-success);
+    font-size: 1.2rem;
+    font-weight: 900;
+    filter: drop-shadow(0 0 5px var(--color-success));
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translate(20px, -60px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(20px, 20px);
+        opacity: 1;
+    }
 }
 
 .graph-edge.directed {
@@ -165,6 +236,43 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.cat-tab {
+    flex: 1;
+    padding: var(--spacing-md);
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.cat-tab:hover:not(:disabled) {
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.cat-tab.active {
+    color: var(--color-primary);
+    background: rgba(0, 240, 255, 0.05);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.cat-tab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .panel-header h2 {
@@ -574,4 +682,93 @@
     .graph-controls-panel {
         order: -1;
     }
+}
+
+/* Weight Editor Modal */
+.weight-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.weight-modal {
+    background: var(--color-bg-panel);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    width: 320px;
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+    text-align: center;
+}
+
+.weight-modal h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-primary);
+    font-size: 1.4rem;
+}
+
+.weight-modal p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.weight-modal p strong {
+    color: var(--color-accent);
+}
+
+.weight-modal input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--border-radius-md);
+    color: var(--color-text-primary);
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.weight-modal input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.modal-btn {
+    flex: 1;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.modal-btn.cancel {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+}
+
+.modal-btn.save {
+    background: var(--color-primary);
+    color: #000;
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
