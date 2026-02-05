@@ -98,9 +98,9 @@
 
 .ds-visualizer-panel,
 .ds-controls-panel {
-    background: var(--color-bg-secondary);
+    background: var(--color-bg-panel);
     border-radius: var(--border-radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border-subtle);
     overflow: hidden;
 }
 
@@ -116,7 +116,7 @@
     transform: translateY(-50%);
     width: 380px;
     max-height: 70vh;
-    background: var(--color-bg-secondary);
+    background: var(--color-bg-panel);
     border: 2px solid var(--color-primary);
     border-radius: var(--border-radius-lg);
     box-shadow: 0 20px 60px rgba(0, 240, 255, 0.2), 0 0 40px rgba(0, 240, 255, 0.1);
@@ -203,8 +203,9 @@
     background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
     border: none;
     border-radius: 30px;
-    color: #000;
-    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
     font-size: 0.9rem;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
@@ -227,8 +228,8 @@
 
 .panel-header {
     padding: var(--spacing-md) var(--spacing-lg);
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-bg-overlay);
+    border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .panel-header h2 {
@@ -344,7 +345,8 @@
 
 .op-btn.insert-end {
     background: linear-gradient(135deg, var(--color-success), #00a87a);
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.insert-end:hover:not(:disabled) {
@@ -374,7 +376,8 @@
 
 .op-btn.access {
     background: linear-gradient(135deg, var(--color-warning), #b38600);
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.access:hover:not(:disabled) {
@@ -455,7 +458,7 @@
     padding: var(--spacing-md) var(--spacing-lg);
     background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     border-radius: var(--border-radius-md);
-    color: #000;
+    color: #ffffff;
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
@@ -545,7 +548,7 @@
 .info-item {
     display: flex;
     gap: var(--spacing-sm);
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--color-bg-overlay);
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius-md);
 }
@@ -628,7 +631,8 @@
 
 .op-btn.push {
     background: linear-gradient(135deg, var(--color-success), #00a87a);
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.push:hover:not(:disabled) {
@@ -648,7 +652,8 @@
 
 .op-btn.peek {
     background: linear-gradient(135deg, var(--color-warning), #b38600);
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.peek:hover:not(:disabled) {
@@ -695,7 +700,7 @@
 .operations-info {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--color-bg-overlay);
     border-radius: var(--border-radius-md);
 }
 
@@ -804,7 +809,7 @@
     padding: var(--spacing-md) var(--spacing-lg);
     background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     border-radius: var(--border-radius-md);
-    color: #000;
+    color: #ffffff;
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
@@ -889,7 +894,8 @@
 
 .op-btn.enqueue {
     background: linear-gradient(135deg, var(--color-success), #00a87a);
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.enqueue:hover:not(:disabled) {
@@ -909,7 +915,8 @@
 
 .op-btn.front-btn {
     background: linear-gradient(135deg, var(--color-warning), #b38600);
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.front-btn:hover:not(:disabled) {
@@ -1018,12 +1025,13 @@
 
 .ll-head-label {
     background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-    color: #000;
+    color: #ffffff;
     padding: 6px 12px;
     border-radius: var(--border-radius);
     font-weight: 700;
     font-size: 0.8rem;
     margin-right: var(--spacing-sm);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ll-node-wrapper {
@@ -1079,8 +1087,8 @@
 
 .ll-node-data {
     padding: 12px 16px;
-    background: rgba(0, 240, 255, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-overlay);
+    border-right: 1px solid var(--color-border-subtle);
 }
 
 .ll-value {
@@ -1132,7 +1140,7 @@
     gap: var(--spacing-lg);
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--color-bg-overlay);
     border-radius: var(--border-radius);
 }
 
@@ -1199,7 +1207,7 @@
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-bg-tertiary);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--color-border-subtle);
     border-left: none;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     flex-wrap: wrap;
@@ -1215,7 +1223,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    background: rgba(0, 240, 255, 0.1);
+    background: var(--color-bg-overlay);
     padding: 6px 12px;
     border-radius: var(--border-radius);
     border: 1px solid var(--color-primary);
@@ -1279,7 +1287,7 @@
     gap: var(--spacing-lg);
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--color-bg-overlay);
     border-radius: var(--border-radius);
 }
 
@@ -1311,6 +1319,8 @@
 
 .op-btn.ht-insert {
     background: linear-gradient(135deg, #00F0FF, #00D4AA);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* ==================== */
@@ -1347,7 +1357,8 @@
 
 .heap-type-btn.active {
     background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-    color: #000;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .heap-type-btn:hover:not(.active) {
@@ -1407,7 +1418,7 @@
 
 .heap-node.root {
     border-color: var(--color-accent);
-    background: rgba(0, 240, 255, 0.15);
+    background: var(--color-bg-overlay);
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
 }
 
@@ -1465,7 +1476,7 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--color-bg-overlay);
     border-radius: var(--border-radius);
     font-size: 0.75rem;
     color: var(--color-text-muted);
@@ -1485,7 +1496,7 @@
     display: flex;
     gap: var(--spacing-lg);
     padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--color-bg-overlay);
     border-radius: var(--border-radius);
 }
 
@@ -1498,12 +1509,18 @@
 
 .op-btn.heap-insert {
     background: linear-gradient(135deg, #00F0FF, #00D4AA);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.heap-extract {
     background: linear-gradient(135deg, #F2994A, #F2C94C);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .op-btn.heap-peek {
     background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }

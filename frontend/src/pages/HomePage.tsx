@@ -12,7 +12,7 @@ const CATEGORIES = [
         title: 'Sorting Algorithms',
         description: 'Bubble, Quick, Merge, Heap, and more sorting algorithms visualized',
         algorithms: ['Bubble Sort', 'Quick Sort', 'Merge Sort', 'Heap Sort'],
-        color: '#6366f1',
+        color: 'var(--color-cat-sorting)',
     },
     {
         id: 'searching',
@@ -20,7 +20,7 @@ const CATEGORIES = [
         title: 'Searching Algorithms',
         description: 'Linear, Binary, Jump, and Interpolation search algorithms',
         algorithms: ['Linear Search', 'Binary Search', 'Jump Search'],
-        color: '#22d3ee',
+        color: 'var(--color-cat-searching)',
     },
     {
         id: 'graph',
@@ -28,7 +28,7 @@ const CATEGORIES = [
         title: 'Graph Algorithms',
         description: 'BFS, DFS, Dijkstra, MST algorithms on interactive graphs',
         algorithms: ['BFS', 'DFS', 'Dijkstra', 'Kruskal', 'Prim'],
-        color: '#f472b6',
+        color: 'var(--color-cat-graph)',
     },
     {
         id: 'tree',
@@ -36,7 +36,7 @@ const CATEGORIES = [
         title: 'Tree Algorithms',
         description: 'Binary tree traversals and BST operations visualized',
         algorithms: ['Inorder', 'Preorder', 'Postorder', 'Level Order'],
-        color: '#10b981',
+        color: 'var(--color-cat-tree)',
     },
     {
         id: 'dp',
@@ -44,7 +44,7 @@ const CATEGORIES = [
         title: 'Dynamic Programming',
         description: 'Classic DP problems with step-by-step table visualization',
         algorithms: ['Fibonacci', 'Knapsack', 'LCS', 'LIS'],
-        color: '#f59e0b',
+        color: 'var(--color-cat-dp)',
     },
 ];
 
