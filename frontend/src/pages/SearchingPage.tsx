@@ -7,6 +7,7 @@ import { getSearchHighlightLine } from '../utils/searchHighlight';
 import { useVisualization } from '../hooks/useVisualization';
 import { API_BASE_URL } from '../config';
 import './SearchingPage.css';
+import CodeModal from './CodeModal';
 
 const ALGORITHMS = [
     { id: 'linear', name: 'Linear Search', complexity: 'O(n)', space: 'O(1)' },
@@ -24,6 +25,58 @@ export const SearchingPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [foundInfo, setFoundInfo] = useState<{ found: boolean; at?: number } | null>(null);
+    const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+
+    const searchingCode = {
+        'Linear Search': `int linearSearch(int arr[], int n, int x) {
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == x)
+            return i;
+    }
+    return -1;
+}`,
+        'Binary Search': `int binarySearch(int arr[], int l, int r, int x) {
+    while (l <= r) {
+        int m = l + (r - l) / 2;
+        if (arr[m] == x) return m;
+        if (arr[m] < x) l = m + 1;
+        else r = m - 1;
+    }
+    return -1;
+}`,
+        'Jump Search': `int jumpSearch(int arr[], int n, int x) {
+    int step = sqrt(n);
+    int prev = 0;
+    while (arr[min(step, n)-1] < x) {
+        prev = step;
+        step += sqrt(n);
+        if (prev >= n) return -1;
+    }
+    while (arr[prev] < x) {
+        prev++;
+        if (prev == min(step, n)) return -1;
+    }
+    if (arr[prev] == x) return prev;
+    return -1;
+}`,
+        'Interpolation Search': `int interpolationSearch(int arr[], int n, int x) {
+    int low = 0, high = (n - 1);
+    while (low <= high && x >= arr[low] && x <= arr[high]) {
+        int pos = low + (((double)(high - low) / (arr[high] - arr[low])) * (x - arr[low]));
+        if (arr[pos] == x) return pos;
+        if (arr[pos] < x) low = pos + 1;
+        else high = pos - 1;
+    }
+    return -1;
+}`,
+        'Exponential Search': `int exponentialSearch(int arr[], int n, int x) {
+    if (arr[0] == x) return 0;
+    int i = 1;
+    while (i < n && arr[i] <= x)
+        i = i * 2;
+    return binarySearch(arr, i/2, min(i, n-1), x);
+}`
+    };
 
     const {
         currentStep, isPlaying, playSpeed, totalSteps, currentStepData, progress,
@@ -133,6 +186,10 @@ export const SearchingPage: React.FC = () => {
             <header className="page-header">
                 <h1>Searching Algorithms</h1>
                 <p>Visualize how different searching algorithms locate values in an array</p>
+                <button className="view-code-main" onClick={() => setIsCodeModalOpen(true)}>
+                    <span className="btn-icon">💻</span>
+                    View Implementation
+                </button>
             </header>
 
             <div className="page-content">
@@ -275,6 +332,13 @@ export const SearchingPage: React.FC = () => {
                     )}
                 </main>
             </div>
+
+            <CodeModal
+                isOpen={isCodeModalOpen}
+                onClose={() => setIsCodeModalOpen(false)}
+                title="Searching Algorithms Implementation"
+                code={searchingCode}
+            />
         </div>
     );
 };

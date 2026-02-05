@@ -7,6 +7,7 @@ import { getHighlightLine } from '../utils/codeHighlight';
 import { useVisualization } from '../hooks/useVisualization';
 import { API_BASE_URL } from '../config';
 import './SortingPage.css';
+import CodeModal from './CodeModal';
 
 const ALGORITHMS = [
     { id: 'bubble', name: 'Bubble Sort', complexity: 'O(n²)', space: 'O(1)' },
@@ -24,6 +25,81 @@ export const SortingPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [stats, setStats] = useState({ comparisons: 0, swaps: 0 });
     const [error, setError] = useState<string | null>(null);
+    const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+
+    const sortingCode = {
+        'Bubble Sort': `void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swap(arr[j], arr[j+1]);
+            }
+        }
+    }
+}`,
+        'Selection Sort': `void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        int minIdx = i;
+        for (int j = i+1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        swap(arr[i], arr[minIdx]);
+    }
+}`,
+        'Insertion Sort': `void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j+1] = arr[j];
+            j--;
+        }
+        arr[j+1] = key;
+    }
+}`,
+        'Merge Sort': `void mergeSort(int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+        merge(arr, l, m, r);
+    }
+}
+
+void merge(int arr[], int l, int m, int r) {
+    // Merge two halves...
+}`,
+        'Quick Sort': `void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high];
+    int i = (low - 1);
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return (i + 1);
+}`,
+        'Heap Sort': `void heapSort(int arr[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);
+        heapify(arr, i, 0);
+    }
+}`
+    };
 
     const {
         currentStep, isPlaying, playSpeed, totalSteps, currentStepData, progress,
@@ -118,6 +194,10 @@ export const SortingPage: React.FC = () => {
             <header className="page-header">
                 <h1>Sorting Algorithms</h1>
                 <p>Visualize how different sorting algorithms work step by step</p>
+                <button className="view-code-main" onClick={() => setIsCodeModalOpen(true)}>
+                    <span className="btn-icon">💻</span>
+                    View Implementation
+                </button>
             </header>
 
             <div className="page-content">
@@ -250,6 +330,13 @@ export const SortingPage: React.FC = () => {
                     )}
                 </main>
             </div>
+
+            <CodeModal
+                isOpen={isCodeModalOpen}
+                onClose={() => setIsCodeModalOpen(false)}
+                title="Sorting Algorithms Implementation"
+                code={sortingCode}
+            />
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { SortingPage } from './pages/SortingPage';
 import { SearchingPage } from './pages/SearchingPage';
 import { DataStructuresPage } from './pages/DataStructuresPage';
+import GraphPage from './pages/GraphPage';
 import './index.css';
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
       case 'datastructures':
         return <DataStructuresPage />;
       case 'graph':
-        return <ComingSoon title="Graph Algorithms" icon="🔗" />;
+        return <GraphPage />;
       case 'tree':
         return <ComingSoon title="Tree Algorithms" icon="🌳" />;
       case 'dp':
