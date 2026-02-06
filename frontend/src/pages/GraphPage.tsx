@@ -23,12 +23,40 @@ interface Edge {
 
 type GraphCategory = 'basic' | 'shortest-path';
 
+const ALGO_DETAILS = {
+    dijkstra: {
+        formula: "f(n) = g(n)",
+        formulaDesc: "Greedy search focusing on total path cost.",
+        logic: [
+            "g(n): Actual cost from start to node n.",
+            "Expands the node with the smallest total distance."
+        ]
+    },
+    'bellman-ford': {
+        formula: "dist[v] \u2264 dist[u] + w",
+        formulaDesc: "Iterative relaxation of all edges.",
+        logic: [
+            "Handles negative weights.",
+            "Checks every path systematically (|V|-1 times)."
+        ]
+    },
+    astar: {
+        formula: "f(n) = g(n) + h(n)",
+        formulaDesc: "Heuristic search using estimates to guide the path.",
+        logic: [
+            "g(n): Actual cost from start to node n.",
+            "h(n): Estimated cost (Euclidean) from n to target.",
+            "Total cost f(n) decides the priority."
+        ]
+    }
+};
+
 const GraphPage: React.FC = () => {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [nextNodeId, setNextNodeId] = useState(0);
     const [selectedNodes, setSelectedNodes] = useState<number[]>([]);
-    const [mode, setMode] = useState<'node' | 'edge' | 'select-start' | 'select-target' | 'set-weight'>('node');
+    const [mode, setMode] = useState<'node' | 'select-start' | 'select-target'>('node');
     const [isDirected, setIsDirected] = useState(false);
     const [startNodeId, setStartNodeId] = useState<number | null>(null);
     const [targetNodeId, setTargetNodeId] = useState<number | null>(null);
@@ -36,14 +64,16 @@ const GraphPage: React.FC = () => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [stopRequested, setStopRequested] = useState(false);
-    const [message, setMessage] = useState('Click on the canvas to add nodes');
+    const [message, setMessage] = useState('Click canvas to add nodes, click two nodes to connect them');
     const [speed, setSpeed] = useState(800);
     const [showCodePanel, setShowCodePanel] = useState(false);
     const [currentLine, setCurrentLine] = useState<number | null>(null);
-    const [activeAlgo, setActiveAlgo] = useState<'bfs' | 'dfs' | 'dijkstra' | null>(null);
+    const [activeAlgo, setActiveAlgo] = useState<'bfs' | 'dfs' | 'dijkstra' | 'bellman-ford' | 'astar' | null>(null);
+    const [shortestPathAlgo, setShortestPathAlgo] = useState<'dijkstra' | 'bellman-ford' | 'astar'>('dijkstra');
     const [editingEdgeId, setEditingEdgeId] = useState<string | null>(null);
     const [tempWeight, setTempWeight] = useState<string>('');
     const [pathCost, setPathCost] = useState<number | null>(null);
+    const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
 
     const ALGO_CODE = {
         bfs: [
@@ -95,6 +125,45 @@ const GraphPage: React.FC = () => {
             "    }",
             "  }",
             "}"
+        ],
+        'bellman-ford': [
+            "void bellmanFord(Node start) {",
+            "  dist[all] = ∞; dist[start] = 0;",
+            "",
+            "  for (int i = 0; i < V - 1; i++) {",
+            "    for (Edge e : allEdges) {",
+            "      if (dist[e.from] + e.weight < dist[e.to]) {",
+            "        dist[e.to] = dist[e.from] + e.weight;",
+            "      }",
+            "    }",
+            "  }",
+            "",
+            "  // Check for negative cycles",
+            "  for (Edge e : allEdges) {",
+            "    if (dist[e.from] + e.weight < dist[e.to])",
+            "      error 'Negative cycle found';",
+            "  }",
+            "}"
+        ],
+        astar: [
+            "void astar(Node start, Node target) {",
+            "  dist[all] = ∞; dist[start] = 0;",
+            "  PQ.push({h(start), start});",
+            "",
+            "  while (!PQ.isEmpty()) {",
+            "    {f, curr} = PQ.pop();",
+            "    if (curr == target) return;",
+            "",
+            "    for (Edge e : adj[curr]) {",
+            "      g = dist[curr] + e.weight;",
+            "      if (g < dist[e.to]) {",
+            "        dist[e.to] = g;",
+            "        f = g + h(e.to, target);",
+            "        PQ.push({f, e.to});",
+            "      }",
+            "    }",
+            "  }",
+            "}"
         ]
     };
 
@@ -115,6 +184,15 @@ const GraphPage: React.FC = () => {
         speedRef.current = speed;
     }, [speed]);
 
+    useEffect(() => {
+        if (activeCategory === 'shortest-path') {
+            setEdges(prev => prev.map(edge => ({
+                ...edge,
+                weight: edge.weight ?? (Math.floor(Math.random() * 9) + 1)
+            })));
+        }
+    }, [activeCategory]);
+
     const canvasRef = useRef<SVGSVGElement>(null);
 
     const showMessage = (msg: string) => {
@@ -124,6 +202,7 @@ const GraphPage: React.FC = () => {
 
     const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
         if (mode !== 'node' || isAnimating) return;
+        setSelectedEdgeId(null);
 
         const svg = canvasRef.current;
         if (!svg) return;
@@ -150,8 +229,9 @@ const GraphPage: React.FC = () => {
     const handleNodeClick = (id: number, e: React.MouseEvent) => {
         e.stopPropagation();
         if (isAnimating) return;
+        setSelectedEdgeId(null);
 
-        if (mode === 'edge') {
+        if (mode === 'node') {
             if (selectedNodes.includes(id)) {
                 setSelectedNodes(prev => prev.filter(nid => nid !== id));
             } else if (selectedNodes.length < 2) {
@@ -160,7 +240,7 @@ const GraphPage: React.FC = () => {
 
                 if (newSelected.length === 2) {
                     const [from, to] = newSelected;
-                    // Check if edge already exists in same direction (if directed) or either (if undirected)
+                    // Check if edge already exists
                     const exists = edges.some(e =>
                         (e.from === from && e.to === to) || (!isDirected && e.from === to && e.to === from)
                     );
@@ -191,12 +271,16 @@ const GraphPage: React.FC = () => {
 
     const handleEdgeClick = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (isAnimating || activeCategory !== 'shortest-path' || mode !== 'set-weight') return;
+        if (isAnimating) return;
 
-        const edge = edges.find(e => e.id === id);
-        if (edge) {
-            setEditingEdgeId(id);
-            setTempWeight(String(edge.weight || 1));
+        setSelectedEdgeId(prev => prev === id ? null : id);
+
+        if (activeCategory === 'shortest-path') {
+            const edge = edges.find(e => e.id === id);
+            if (edge) {
+                setEditingEdgeId(id);
+                setTempWeight(String(edge.weight || 1));
+            }
         }
     };
 
@@ -215,6 +299,13 @@ const GraphPage: React.FC = () => {
             setStopRequested(true);
             return;
         }
+
+        if (selectedEdgeId) {
+            setEdges(prev => prev.filter(e => e.id !== selectedEdgeId));
+            setSelectedEdgeId(null);
+            return;
+        }
+
         setNodes([]);
         setEdges([]);
         setNextNodeId(0);
@@ -241,6 +332,14 @@ const GraphPage: React.FC = () => {
                 .map(e => e.from === nodeId ? e.to : e.from);
         }
     };
+
+    const getHeuristic = useCallback((nodeId: number) => {
+        const node = nodes.find(n => n.id === nodeId);
+        const targetNode = nodes.find(n => n.id === targetNodeId);
+        if (!node || !targetNode) return 0;
+        const dist = Math.sqrt(Math.pow(node.x - targetNode.x, 2) + Math.pow(node.y - targetNode.y, 2));
+        return Math.floor(dist / 50); // Normalize heuristic
+    }, [nodes, targetNodeId]);
 
     const sleep = async (ms?: number) => {
         const duration = ms !== undefined ? ms : speedRef.current;
@@ -354,6 +453,7 @@ const GraphPage: React.FC = () => {
             if (previous[targetNodeId] !== null || targetNodeId === startNodeId) {
                 let curr = targetNodeId;
                 const pathEdges: string[] = [];
+                const pathNodeIds: number[] = [targetNodeId];
                 while (curr !== startNodeId && curr !== null) {
                     const prevNode = previous[curr];
                     if (prevNode === null) break;
@@ -362,12 +462,17 @@ const GraphPage: React.FC = () => {
                         (!isDirected && e.from === curr && e.to === prevNode)
                     );
                     if (edge) pathEdges.push(edge.id);
+                    pathNodeIds.push(prevNode);
                     curr = prevNode;
                 }
 
                 setEdges(prev => prev.map(e => pathEdges.includes(e.id) ? { ...e, isActive: true } : e));
+                setNodes(prev => prev.map(n => ({
+                    ...n,
+                    isVisited: pathNodeIds.includes(n.id)
+                })));
                 setPathCost(distances[targetNodeId]);
-                showMessage(`Shortest distance: ${distances[targetNodeId]}`);
+                showMessage(`${shortestPathAlgo.toUpperCase()} Complete!`);
             } else {
                 showMessage('No path found');
             }
@@ -382,6 +487,247 @@ const GraphPage: React.FC = () => {
         }
     };
 
+    const runBellmanFord = async () => {
+        if (nodes.length === 0 || isAnimating || startNodeId === null || targetNodeId === null) {
+            showMessage('Select Start and Target nodes first!');
+            return;
+        }
+
+        setIsAnimating(true);
+        setIsPaused(false);
+        setStopRequested(false);
+        resetColors();
+        setActiveAlgo('bellman-ford');
+
+        const distances: Record<number, number> = {};
+        const previous: Record<number, number | null> = {};
+
+        nodes.forEach(node => {
+            distances[node.id] = Infinity;
+            previous[node.id] = null;
+        });
+
+        distances[startNodeId] = 0;
+        setNodes(prev => prev.map(n => ({
+            ...n,
+            distance: n.id === startNodeId ? 0 : '∞'
+        })));
+
+        try {
+            await highlight(1); // dist[all] = inf; dist[start] = 0
+
+            for (let i = 0; i < nodes.length - 1; i++) {
+                await highlight(3); // for (int i = 0; i < V - 1; i++)
+                let changed = false;
+
+                for (const edge of edges) {
+                    if (stopRequestedRef.current) break;
+                    await highlight(4); // for (Edge e : allEdges)
+
+                    // Visualize edge check
+                    setEdges(prev => prev.map(e => e.id === edge.id ? { ...e, isActive: true } : e));
+                    setNodes(prev => prev.map(n => n.id === edge.from ? { ...n, isActive: true } : n));
+
+                    const weight = edge.weight || 1;
+                    const u = edge.from;
+                    const v = edge.to;
+
+                    await highlight(5); // if (dist[e.from] + e.weight < dist[e.to])
+                    if (distances[u] !== Infinity && distances[u] + weight < distances[v]) {
+                        distances[v] = distances[u] + weight;
+                        previous[v] = u;
+                        changed = true;
+                        setNodes(prev => prev.map(n => n.id === v ? { ...n, distance: distances[v], isFrontier: true } : n));
+                        await highlight(6); // dist[e.to] = dist[e.from] + e.weight
+                        setNodes(prev => prev.map(n => n.id === v ? { ...n, isFrontier: false } : n));
+                    }
+
+                    // For Undirected graphs, relax both directions
+                    if (!isDirected && distances[v] !== Infinity && distances[v] + weight < distances[u]) {
+                        distances[u] = distances[v] + weight;
+                        previous[u] = v;
+                        changed = true;
+                        setNodes(prev => prev.map(n => n.id === u ? { ...n, distance: distances[u], isFrontier: true } : n));
+                        await highlight(6);
+                        setNodes(prev => prev.map(n => n.id === u ? { ...n, isFrontier: false } : n));
+                    }
+
+                    setEdges(prev => prev.map(e => e.id === edge.id ? { ...e, isActive: false } : e));
+                    setNodes(prev => prev.map(n => n.id === edge.from ? { ...n, isActive: false, isVisited: true } : n));
+                }
+
+                if (!changed) break;
+            }
+
+            // Path Trace
+            if (previous[targetNodeId] !== null || targetNodeId === startNodeId) {
+                let curr = targetNodeId;
+                const pathEdges: string[] = [];
+                const pathNodeIds: number[] = [targetNodeId];
+                while (curr !== startNodeId && curr !== null) {
+                    const prevNode = previous[curr];
+                    if (prevNode === null) break;
+                    const edge = edges.find(e =>
+                        (e.from === prevNode && e.to === curr) || (!isDirected && e.from === curr && e.to === prevNode)
+                    );
+                    if (edge) pathEdges.push(edge.id);
+                    pathNodeIds.push(prevNode);
+                    curr = prevNode;
+                }
+                setEdges(prev => prev.map(e => pathEdges.includes(e.id) ? { ...e, isActive: true } : e));
+                setNodes(prev => prev.map(n => ({ ...n, isVisited: pathNodeIds.includes(n.id) })));
+                setPathCost(distances[targetNodeId]);
+                showMessage(`Bellman-Ford Complete!`);
+            } else {
+                showMessage('No path found');
+            }
+
+        } catch (e: any) {
+            if (e.message === 'STOP') showMessage('Traversal Stopped');
+        } finally {
+            setIsAnimating(false);
+            setIsPaused(false);
+            setStopRequested(false);
+            setCurrentLine(null);
+        }
+    };
+
+    const runAStar = async () => {
+        if (nodes.length === 0 || isAnimating || startNodeId === null || targetNodeId === null) {
+            showMessage('Select Start and Target nodes first!');
+            return;
+        }
+
+        setIsAnimating(true);
+        setIsPaused(false);
+        setStopRequested(false);
+        resetColors();
+        setActiveAlgo('astar');
+
+        const distances: Record<number, number> = {};
+        const fScores: Record<number, number> = {};
+        const previous: Record<number, number | null> = {};
+        const unvisited = new Set<number>();
+
+        nodes.forEach(node => {
+            distances[node.id] = Infinity;
+            fScores[node.id] = Infinity;
+            previous[node.id] = null;
+            unvisited.add(node.id);
+        });
+
+        distances[startNodeId] = 0;
+        fScores[startNodeId] = getHeuristic(startNodeId);
+
+        setNodes(prev => prev.map(n => ({
+            ...n,
+            distance: n.id === startNodeId ? `0+${getHeuristic(n.id)}` : '∞'
+        })));
+
+        try {
+            await highlight(1); // dist[all] = inf; dist[start] = 0
+            await highlight(2); // PQ.push({h(start), start})
+
+            while (unvisited.size > 0) {
+                let currentId: number | null = null;
+                let minF = Infinity;
+
+                unvisited.forEach(id => {
+                    if (fScores[id] < minF) {
+                        minF = fScores[id];
+                        currentId = id;
+                    }
+                });
+
+                if (currentId === null || minF === Infinity) break;
+                const currentIdLocked = currentId as number;
+                await highlight(5); // {f, curr} = PQ.pop()
+
+                unvisited.delete(currentIdLocked);
+                setNodes(prev => prev.map(n => n.id === currentIdLocked ? { ...n, isActive: true } : n));
+                await highlight(6); // if (curr == target) return
+
+                if (currentIdLocked === targetNodeId) break;
+
+                const neighborhood = getNeighbors(currentIdLocked);
+                await highlight(8); // for (Edge e : adj[curr])
+
+                for (const neighborId of neighborhood) {
+                    const edge = edges.find(e =>
+                        (e.from === currentIdLocked && e.to === neighborId) ||
+                        (!isDirected && e.from === neighborId && e.to === currentIdLocked)
+                    );
+
+                    if (edge) setEdges(prev => prev.map(e => e.id === edge.id ? { ...e, isActive: true } : e));
+
+                    const weight = edge?.weight || 1;
+                    const gScore = distances[currentIdLocked] + weight;
+
+                    await highlight(9); // g = dist[curr] + weight
+                    await highlight(10); // if (g < dist[e.to])
+                    if (gScore < distances[neighborId]) {
+                        distances[neighborId] = gScore;
+                        const h = getHeuristic(neighborId);
+                        fScores[neighborId] = gScore + h;
+                        previous[neighborId] = currentIdLocked;
+
+                        setNodes(prev => prev.map(n => n.id === neighborId ? {
+                            ...n,
+                            distance: `${gScore}+${h}`,
+                            isFrontier: true
+                        } : n));
+
+                        await highlight(11); // dist[e.to] = g
+                        await highlight(12); // f = g + h
+                        await highlight(13); // PQ.push({f, e.to})
+                        setNodes(prev => prev.map(n => n.id === neighborId ? { ...n, isFrontier: false } : n));
+                    }
+
+                    if (edge) setEdges(prev => prev.map(e => e.id === edge.id ? { ...e, isActive: false } : e));
+                }
+
+                setNodes(prev => prev.map(n => n.id === currentIdLocked ? { ...n, isActive: false, isVisited: true } : n));
+            }
+
+            // Path Trace
+            if (previous[targetNodeId] !== null || targetNodeId === startNodeId) {
+                let curr = targetNodeId;
+                const pathEdges: string[] = [];
+                const pathNodeIds: number[] = [targetNodeId];
+                while (curr !== startNodeId && curr !== null) {
+                    const prevNode = previous[curr];
+                    if (prevNode === null) break;
+                    const edge = edges.find(e =>
+                        (e.from === prevNode && e.to === curr) || (!isDirected && e.from === curr && e.to === prevNode)
+                    );
+                    if (edge) pathEdges.push(edge.id);
+                    pathNodeIds.push(prevNode);
+                    curr = prevNode;
+                }
+                setEdges(prev => prev.map(e => pathEdges.includes(e.id) ? { ...e, isActive: true } : e));
+                setNodes(prev => prev.map(n => ({ ...n, isVisited: pathNodeIds.includes(n.id) })));
+                setPathCost(distances[targetNodeId]);
+                showMessage(`A* Search Complete!`);
+            } else {
+                showMessage('No path found');
+            }
+
+        } catch (e: any) {
+            if (e.message === 'STOP') showMessage('Traversal Stopped');
+        } finally {
+            setIsAnimating(false);
+            setIsPaused(false);
+            setStopRequested(false);
+            setCurrentLine(null);
+        }
+    };
+
+    const runShortestPath = () => {
+        if (shortestPathAlgo === 'dijkstra') runDijkstra();
+        else if (shortestPathAlgo === 'bellman-ford') runBellmanFord();
+        else if (shortestPathAlgo === 'astar') runAStar();
+    };
+
     const runBFS = async () => {
         if (nodes.length === 0 || isAnimating) return;
         const startId = startNodeId !== null ? startNodeId : nodes[0].id;
@@ -394,6 +740,8 @@ const GraphPage: React.FC = () => {
 
         const queue: number[] = [startId];
         const visited = new Set<number>([startId]);
+        const previous: Record<number, number | null> = {};
+        nodes.forEach(n => previous[n.id] = null);
 
         try {
             await highlight(1); // queue q = [start]
@@ -412,7 +760,27 @@ const GraphPage: React.FC = () => {
                 await highlight(6); // if (curr == target) return;
 
                 if (currentId === targetNodeId) {
-                    showMessage(`Target node ${nodes.find(n => n.id === currentId)?.label} found!`);
+                    showMessage(`Target node found! Tracing path...`);
+                    // Trace path
+                    let curr = targetNodeId;
+                    const pathEdges: string[] = [];
+                    const pathNodeIds: number[] = [targetNodeId];
+                    while (curr !== startId && curr !== null) {
+                        const prevNode = previous[curr];
+                        if (prevNode === null) break;
+                        const edge = edges.find(e =>
+                            (e.from === prevNode && e.to === curr) ||
+                            (!isDirected && e.from === curr && e.to === prevNode)
+                        );
+                        if (edge) pathEdges.push(edge.id);
+                        pathNodeIds.push(prevNode);
+                        curr = prevNode;
+                    }
+                    setEdges(prev => prev.map(e => pathEdges.includes(e.id) ? { ...e, isActive: true } : e));
+                    setNodes(prev => prev.map(n => ({
+                        ...n,
+                        isVisited: pathNodeIds.includes(n.id)
+                    })));
                     setIsAnimating(false);
                     return;
                 }
@@ -435,6 +803,7 @@ const GraphPage: React.FC = () => {
                             n.id === neighborId ? { ...n, isFrontier: true } : n
                         ));
 
+                        previous[neighborId] = currentId;
                         queue.push(neighborId);
                         await highlight(11); // q.enqueue(neighbor)
                     }
@@ -469,6 +838,8 @@ const GraphPage: React.FC = () => {
         setActiveAlgo('dfs');
 
         const visited = new Set<number>();
+        const previous: Record<number, number | null> = {};
+        nodes.forEach(n => previous[n.id] = null);
 
         const dfs = async (currentId: number) => {
             if (found || stopRequestedRef.current) return;
@@ -496,6 +867,7 @@ const GraphPage: React.FC = () => {
                             ? { ...e, isActive: true } : e
                     ));
 
+                    previous[neighborId] = currentId;
                     await highlight(6); // if (dfs(neighbor, target))
                     await dfs(neighborId);
 
@@ -514,7 +886,30 @@ const GraphPage: React.FC = () => {
 
         try {
             await dfs(startId);
-            if (!found && !stopRequestedRef.current) showMessage('DFS Traversal Complete');
+            if (found) {
+                // Trace path
+                let curr = targetNodeId!;
+                const pathEdges: string[] = [];
+                const pathNodeIds: number[] = [targetNodeId!];
+                while (curr !== startId && curr !== null) {
+                    const prevNode = previous[curr];
+                    if (prevNode === null) break;
+                    const edge = edges.find(e =>
+                        (e.from === prevNode && e.to === curr) ||
+                        (!isDirected && e.from === curr && e.to === prevNode)
+                    );
+                    if (edge) pathEdges.push(edge.id);
+                    pathNodeIds.push(prevNode);
+                    curr = prevNode;
+                }
+                setEdges(prev => prev.map(e => pathEdges.includes(e.id) ? { ...e, isActive: true } : e));
+                setNodes(prev => prev.map(n => ({
+                    ...n,
+                    isVisited: pathNodeIds.includes(n.id)
+                })));
+            } else if (!stopRequestedRef.current) {
+                showMessage('DFS Traversal Complete');
+            }
             if (stopRequestedRef.current) showMessage('Traversal Stopped');
         } catch (e: any) {
             if (e.message === 'STOP') showMessage('Traversal Stopped');
@@ -539,8 +934,17 @@ const GraphPage: React.FC = () => {
             <div className="graph-layout">
                 <div className="graph-visualizer-panel">
                     <div className="panel-header">
-                        <h2>Visualization Canvas</h2>
-                        <div className="canvas-hint">{message}</div>
+                        <div className="header-left">
+                            <h2>Visualization Canvas</h2>
+                        </div>
+                        <div className="header-right">
+                            <div className="canvas-hint">{message}</div>
+                            <button className="icon-btn clear-btn" onClick={clearCanvas} title="Clear Canvas">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div className="canvas-container">
@@ -592,11 +996,11 @@ const GraphPage: React.FC = () => {
                                             y1={fromNode.y}
                                             x2={toNode.x}
                                             y2={toNode.y}
-                                            className={`graph-edge ${edge.isActive ? 'active' : ''} ${edge.isDirected ? 'directed' : ''}`}
+                                            className={`graph-edge ${edge.isActive ? 'active' : ''} ${edge.isDirected ? 'directed' : ''} ${selectedEdgeId === edge.id ? 'selected-for-delete' : ''}`}
                                             markerEnd={edge.isDirected ? `url(#arrowhead${edge.isActive ? '-active' : ''})` : ''}
                                             onClick={(e) => handleEdgeClick(edge.id, e)}
                                         />
-                                        {edge.weight !== undefined && (
+                                        {activeCategory === 'shortest-path' && edge.weight !== undefined && (
                                             <g className="edge-weight-group" onClick={(e) => handleEdgeClick(edge.id, e)}>
                                                 <rect x={midX - 12} y={midY - 12} width="24" height="24" rx="4" className="weight-bg" />
                                                 <text x={midX} y={midY} dy=".35em" textAnchor="middle" className="weight-text">
@@ -623,6 +1027,11 @@ const GraphPage: React.FC = () => {
                                     {node.distance !== undefined && (
                                         <text dy="-35" textAnchor="middle" className="dist-label">
                                             {node.distance}
+                                        </text>
+                                    )}
+                                    {activeCategory === 'shortest-path' && shortestPathAlgo === 'astar' && targetNodeId !== null && (
+                                        <text dy="38" textAnchor="middle" className="heuristic-label">
+                                            h={getHeuristic(node.id)}
                                         </text>
                                     )}
                                     {startNodeId === node.id && <text dy={node.distance !== undefined ? "-50" : "-35"} textAnchor="middle" className="node-indicator">START</text>}
@@ -674,26 +1083,8 @@ const GraphPage: React.FC = () => {
                                     disabled={isAnimating}
                                 >
                                     <span className="btn-icon">⭕</span>
-                                    Nodes
+                                    Build
                                 </button>
-                                <button
-                                    className={`mode-btn ${mode === 'edge' ? 'active' : ''}`}
-                                    onClick={() => setMode('edge')}
-                                    disabled={isAnimating}
-                                >
-                                    <span className="btn-icon">➖</span>
-                                    Edges
-                                </button>
-                                {activeCategory === 'shortest-path' && (
-                                    <button
-                                        className={`mode-btn ${mode === 'set-weight' ? 'active' : ''}`}
-                                        onClick={() => setMode('set-weight')}
-                                        disabled={isAnimating}
-                                    >
-                                        <span className="btn-icon">⚖️</span>
-                                        Weight
-                                    </button>
-                                )}
                             </div>
                         </div>
 
@@ -789,19 +1180,59 @@ const GraphPage: React.FC = () => {
                                             </button>
                                         </>
                                     ) : (
-                                        <button
-                                            className="op-btn BFS"
-                                            onClick={runDijkstra}
-                                            disabled={nodes.length === 0}
-                                            style={{ gridColumn: 'span 2' }}
-                                        >
-                                            <span className="op-icon">🏁</span>
-                                            Dijkstra's
-                                        </button>
+                                        <div className="algo-selector-carousel">
+                                            <button
+                                                className="carousel-arrow left"
+                                                onClick={() => setShortestPathAlgo(prev =>
+                                                    prev === 'dijkstra' ? 'astar' : prev === 'bellman-ford' ? 'dijkstra' : 'bellman-ford'
+                                                )}
+                                                disabled={isAnimating}
+                                                title="Previous Algorithm"
+                                            >
+                                                ‹
+                                            </button>
+                                            <button
+                                                className="op-btn active-algo"
+                                                onClick={runShortestPath}
+                                                disabled={nodes.length === 0}
+                                            >
+                                                <span className="op-icon">
+                                                    {shortestPathAlgo === 'dijkstra' ? '🏁' : shortestPathAlgo === 'bellman-ford' ? '📉' : '🎯'}
+                                                </span>
+                                                {shortestPathAlgo === 'dijkstra' ? 'Dijkstra' : shortestPathAlgo === 'bellman-ford' ? 'Bellman-Ford' : 'A* Search'}
+                                            </button>
+                                            <button
+                                                className="carousel-arrow right"
+                                                onClick={() => setShortestPathAlgo(prev =>
+                                                    prev === 'dijkstra' ? 'bellman-ford' : prev === 'bellman-ford' ? 'astar' : 'dijkstra'
+                                                )}
+                                                disabled={isAnimating}
+                                                title="Next Algorithm"
+                                            >
+                                                ›
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             )}
                         </div>
+
+                        {activeCategory === 'shortest-path' && (
+                            <div className="algo-info-card">
+                                <div className="info-header">
+                                    <span className="formula">{ALGO_DETAILS[shortestPathAlgo].formula}</span>
+                                    <p className="formula-desc">{ALGO_DETAILS[shortestPathAlgo].formulaDesc}</p>
+                                </div>
+                                <div className="info-logic">
+                                    {ALGO_DETAILS[shortestPathAlgo].logic.map((item, i) => (
+                                        <div key={i} className="logic-item">
+                                            <span className="bullet">{"\u2022"}</span>
+                                            <span>{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="settings-section">
                             <div className="label-row">
@@ -821,20 +1252,14 @@ const GraphPage: React.FC = () => {
                             />
                         </div>
 
-                        <div className="danger-zone">
-                            <button className="op-btn clear-all" onClick={clearCanvas}>
-                                <span className="op-icon">🗑️</span>
-                                {isAnimating ? 'Stop & Clear' : 'Clear Canvas'}
-                            </button>
-                        </div>
                     </div>
-
-                    {message && (
-                        <div className="message-display animate-fadeIn">
-                            {message}
-                        </div>
-                    )}
                 </div>
+
+                {message && (
+                    <div className="message-display animate-fadeIn">
+                        {message}
+                    </div>
+                )}
             </div>
 
             {/* View Code Floating Button */}
@@ -854,7 +1279,7 @@ const GraphPage: React.FC = () => {
                 </div>
                 <div className="code-container">
                     <pre className="code-block">
-                        {(activeAlgo ? ALGO_CODE[activeAlgo] : ALGO_CODE.bfs).map((line, index) => (
+                        {(activeAlgo ? (ALGO_CODE[activeAlgo] as string[]) : ALGO_CODE.bfs).map((line: string, index: number) => (
                             <div
                                 key={index}
                                 className={`code-line ${currentLine === index ? 'highlighted' : ''}`}
